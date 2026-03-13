@@ -1,0 +1,216 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum UserRole {
+  USER
+  ADMIN
+}
+
+enum TripStatus {
+  ACTIVE
+  CANCELLED
+  COMPLETED
+}
+
+enum BookingStatus {
+  PENDING_PAYMENT
+  CONFIRMED
+  CANCELLED
+  REFUNDED
+  COMPLETED
+}
+
+enum PaymentStatus {
+  REQUIRES_PAYMENT_METHOD
+  REQUIRES_CONFIRMATION
+  SUCCEEDED
+  CANCELED
+  REFUNDED
+}
+
+enum CancelledBy {
+  DRIVER
+  PASSENGER
+  ADMIN
+  SYSTEM
+}
+
+enum WalletTransactionType {
+  BOOKING_CREDIT
+  WITHDRAWAL
+  PENALTY_RECEIVED
+  PENALTY_PAID
+  ADJUSTMENT
+}
+
+model User {
+  id                String   @id @default(uuid())
+  phone             String   @unique
+  firstName         String?  @map("first_name")
+  photoUrl          String?  @map("photo_url")
+  rating            Decimal  @default(5.0) @db.Decimal(3, 2)
+  reliabilityScore  Int      @default(100) @map("reliability_score")
+  refreshTokenHash  String?  @map("refresh_token_hash")
+  role              UserRole @default(USER)
+  isSuspended       Boolean  @default(false) @map("is_suspended")
+  fcmToken          String?  @map("fcm_token")
+  deletedAt         DateTime? @map("deleted_at")
+  createdAt         DateTime @default(now()) @map("created_at")
+  updatedAt         DateTime @updatedAt @map("updated_at")
+
+  vehicles          Vehicle[]
+  drivenTrips       Trip[]              @relation("DriverTrips")
+  bookings          Booking[]
+  walletTransactions WalletTransaction[]
+  ratingsGiven      Rating[]            @relation("RatingsGiven")
+  ratingsReceived   Rating[]            @relation("RatingsReceived")
+  sentMessages      Message[]           @relation("MessageSender")
+
+  @@map("users")
+}
+
+model Trip {
+  id               String    @id @default(uuid())
+  driverId         String    @map("driver_id")
+  vehicleId        String?   @map("vehicle_id")
+  origin           String
+  destination      String
+  distanceKm       Decimal   @map("distance_km") @db.Decimal(8, 2)
+  departureTime    DateTime  @map("departure_time")
+  seatsAvailable   Int       @map("seats_available")
+  priceTotal       Decimal   @map("price_total") @db.Decimal(10, 2)
+  commissionAmount Decimal   @map("commission_amount") @db.Decimal(10, 2)
+  driverAmount     Decimal   @map("driver_amount") @db.Decimal(10, 2)
+  status           TripStatus @default(ACTIVE)
+  createdAt        DateTime  @default(now()) @map("created_at")
+  updatedAt        DateTime  @updatedAt @map("updated_at")
+
+  driver           User      @relation("DriverTrips", fields: [driverId], references: [id], onDelete: Restrict)
+  vehicle          Vehicle?  @relation(fields: [vehicleId], references: [id], onDelete: SetNull)
+  bookings         Booking[]
+  ratings          Rating[]
+
+  @@index([driverId])
+  @@index([status, departureTime])
+  @@map("trips")
+}
+
+model Booking {
+  id           String       @id @default(uuid())
+  tripId        String      @map("trip_id")
+  passengerId   String      @map("passenger_id")
+  status        BookingStatus @default(PENDING_PAYMENT)
+  bookedAt      DateTime    @default(now()) @map("booked_at")
+  updatedAt     DateTime    @updatedAt @map("updated_at")
+
+  trip          Trip        @relation(fields: [tripId], references: [id], onDelete: Cascade)
+  passenger     User        @relation(fields: [passengerId], references: [id], onDelete: Restrict)
+  payment       Payment?
+  cancellation  Cancellation?
+  messages      Message[]
+
+  @@unique([tripId, passengerId])
+  @@index([tripId])
+  @@index([passengerId])
+  @@map("bookings")
+}
+
+model Payment {
+  id                    String      @id @default(uuid())
+  bookingId             String      @unique @map("booking_id")
+  amountTotal           Decimal     @map("amount_total") @db.Decimal(10, 2)
+  commissionAmount      Decimal     @map("commission_amount") @db.Decimal(10, 2)
+  driverAmount          Decimal     @map("driver_amount") @db.Decimal(10, 2)
+  status                PaymentStatus @default(REQUIRES_PAYMENT_METHOD)
+  stripePaymentIntentId String?     @unique @map("stripe_payment_intent_id")
+  createdAt             DateTime    @default(now()) @map("created_at")
+  updatedAt             DateTime    @updatedAt @map("updated_at")
+
+  booking               Booking     @relation(fields: [bookingId], references: [id], onDelete: Cascade)
+
+  @@index([status])
+  @@map("payments")
+}
+
+model Cancellation {
+  id            String      @id @default(uuid())
+  bookingId     String      @unique @map("booking_id")
+  cancelledBy   CancelledBy @map("cancelled_by")
+  penaltyAmount Decimal     @default(0) @map("penalty_amount") @db.Decimal(10, 2)
+  reason        String?
+  createdAt     DateTime    @default(now()) @map("created_at")
+
+  booking       Booking     @relation(fields: [bookingId], references: [id], onDelete: Cascade)
+
+  @@index([cancelledBy, createdAt])
+  @@map("cancellations")
+}
+
+model WalletTransaction {
+  id          String                @id @default(uuid())
+  userId      String                @map("user_id")
+  type        WalletTransactionType
+  amount      Decimal               @db.Decimal(10, 2)
+  description String
+  createdAt   DateTime              @default(now()) @map("created_at")
+
+  user        User                  @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, createdAt])
+  @@map("wallet_transactions")
+}
+
+model Rating {
+  id        String   @id @default(uuid())
+  raterId   String   @map("rater_id")
+  rateeId   String   @map("ratee_id")
+  tripId    String   @map("trip_id")
+  score     Int
+  comment   String?
+  createdAt DateTime @default(now()) @map("created_at")
+
+  rater     User     @relation("RatingsGiven", fields: [raterId], references: [id], onDelete: Restrict)
+  ratee     User     @relation("RatingsReceived", fields: [rateeId], references: [id], onDelete: Restrict)
+  trip      Trip     @relation(fields: [tripId], references: [id], onDelete: Cascade)
+
+  @@unique([raterId, rateeId, tripId])
+  @@index([tripId])
+  @@map("ratings")
+}
+
+model Message {
+  id        String   @id @default(uuid())
+  bookingId String   @map("booking_id")
+  senderId  String   @map("sender_id")
+  content   String
+  createdAt DateTime @default(now()) @map("created_at")
+
+  booking   Booking  @relation(fields: [bookingId], references: [id], onDelete: Cascade)
+  sender    User     @relation("MessageSender", fields: [senderId], references: [id], onDelete: Restrict)
+
+  @@index([bookingId, createdAt])
+  @@map("messages")
+}
+
+model Vehicle {
+  id        String   @id @default(uuid())
+  userId    String   @map("user_id")
+  brand     String
+  model     String
+  color     String
+  plate     String   @unique
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  trips     Trip[]
+
+  @@index([userId])
+  @@map("vehicles")
+}

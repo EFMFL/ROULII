@@ -1,0 +1,30 @@
+import * as Joi from 'joi';
+
+export const environmentValidationSchema = Joi.object({
+  NODE_ENV: Joi.string()
+    .valid('development', 'test', 'production')
+    .default('development'),
+  PORT: Joi.number().port().default(3000),
+  DATABASE_URL: Joi.string().uri().required(),
+  REDIS_HOST: Joi.string().required(),
+  REDIS_PORT: Joi.number().port().default(6379),
+  REDIS_PASSWORD: Joi.string().allow('').optional(),
+  JWT_ACCESS_SECRET: Joi.string().min(32).required(),
+  JWT_REFRESH_SECRET: Joi.string().min(32).required(),
+  JWT_ACCESS_EXPIRES_IN: Joi.string().default('15m'),
+  JWT_REFRESH_EXPIRES_IN: Joi.string().default('30d'),
+  TWILIO_ACCOUNT_SID: Joi.string().allow('').optional(),
+  TWILIO_AUTH_TOKEN: Joi.string().allow('').optional(),
+  TWILIO_MESSAGING_SERVICE_SID: Joi.string().allow('').optional(),
+  TWILIO_FROM_PHONE: Joi.string().allow('').optional(),
+  STRIPE_SECRET_KEY: Joi.string().allow('').optional(),
+  STRIPE_WEBHOOK_SECRET: Joi.string().allow('').optional(),
+  STRIPE_CONNECT_CLIENT_ID: Joi.string().allow('').optional(),
+  FIREBASE_PROJECT_ID: Joi.string().allow('').optional(),
+  FIREBASE_CLIENT_EMAIL: Joi.string().allow('').optional(),
+  FIREBASE_PRIVATE_KEY: Joi.string().allow('').optional(),
+  AWS_REGION: Joi.string().default('eu-west-1'),
+  AWS_S3_BUCKET: Joi.string().allow('').optional(),
+  AWS_ACCESS_KEY_ID: Joi.string().allow('').optional(),
+  AWS_SECRET_ACCESS_KEY: Joi.string().allow('').optional(),
+});
