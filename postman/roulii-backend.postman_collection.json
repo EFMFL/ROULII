@@ -36,12 +36,317 @@
           }
         }
       ]
+    },
+    {
+      "name": "Auth - Send OTP",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"phone\": \"{{phone}}\"\n}"
+        },
+        "url": {
+          "raw": "{{baseUrl}}/api/v1/auth/send-otp",
+          "host": ["{{baseUrl}}"],
+          "path": ["api", "v1", "auth", "send-otp"]
+        }
+      }
+    },
+    {
+      "name": "Auth - Verify OTP",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"phone\": \"{{phone}}\",\n  \"code\": \"{{otpCode}}\",\n  \"firstName\": \"Marie\"\n}"
+        },
+        "url": {
+          "raw": "{{baseUrl}}/api/v1/auth/verify-otp",
+          "host": ["{{baseUrl}}"],
+          "path": ["api", "v1", "auth", "verify-otp"]
+        }
+      }
+    },
+    {
+      "name": "Upload - Presigned URL",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{accessToken}}"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"filename\": \"avatar.jpg\",\n  \"contentType\": \"image/jpeg\"\n}"
+        },
+        "url": {
+          "raw": "{{baseUrl}}/api/v1/upload/presigned-url",
+          "host": ["{{baseUrl}}"],
+          "path": ["api", "v1", "upload", "presigned-url"]
+        }
+      }
+    },
+    {
+      "name": "Vehicles - Create",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{accessToken}}"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"brand\": \"Renault\",\n  \"model\": \"Clio\",\n  \"color\": \"Noir\",\n  \"plate\": \"AB-123-CD\"\n}"
+        },
+        "url": {
+          "raw": "{{baseUrl}}/api/v1/vehicles",
+          "host": ["{{baseUrl}}"],
+          "path": ["api", "v1", "vehicles"]
+        }
+      }
+    },
+    {
+      "name": "Trips - Calculate",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{baseUrl}}/api/v1/trips/calculate?origin=48.8566,2.3522&destination=45.7640,4.8357",
+          "host": ["{{baseUrl}}"],
+          "path": ["api", "v1", "trips", "calculate"],
+          "query": [
+            {
+              "key": "origin",
+              "value": "48.8566,2.3522"
+            },
+            {
+              "key": "destination",
+              "value": "45.7640,4.8357"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "name": "Trips - Create",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{accessToken}}"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"origin\": \"48.8566,2.3522\",\n  \"destination\": \"45.7640,4.8357\",\n  \"departureTime\": \"2026-08-20T15:30:00.000Z\",\n  \"seatsAvailable\": 3,\n  \"vehicleId\": \"{{vehicleId}}\"\n}"
+        },
+        "url": {
+          "raw": "{{baseUrl}}/api/v1/trips",
+          "host": ["{{baseUrl}}"],
+          "path": ["api", "v1", "trips"]
+        }
+      }
+    },
+    {
+      "name": "Bookings - Create",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{accessToken}}"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"tripId\": \"{{tripId}}\",\n  \"seats\": 1\n}"
+        },
+        "url": {
+          "raw": "{{baseUrl}}/api/v1/bookings",
+          "host": ["{{baseUrl}}"],
+          "path": ["api", "v1", "bookings"]
+        }
+      }
+    },
+    {
+      "name": "Payments - Create Intent",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{accessToken}}"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"bookingId\": \"{{bookingId}}\"\n}"
+        },
+        "url": {
+          "raw": "{{baseUrl}}/api/v1/payments/intent",
+          "host": ["{{baseUrl}}"],
+          "path": ["api", "v1", "payments", "intent"]
+        }
+      }
+    },
+    {
+      "name": "Wallet - Balance",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{accessToken}}"
+          }
+        ],
+        "url": {
+          "raw": "{{baseUrl}}/api/v1/wallet/balance",
+          "host": ["{{baseUrl}}"],
+          "path": ["api", "v1", "wallet", "balance"]
+        }
+      }
+    },
+    {
+      "name": "Ratings - Create",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{accessToken}}"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"bookingId\": \"{{bookingId}}\",\n  \"rateeId\": \"{{rateeId}}\",\n  \"score\": 5,\n  \"comment\": \"Super trajet\"\n}"
+        },
+        "url": {
+          "raw": "{{baseUrl}}/api/v1/ratings",
+          "host": ["{{baseUrl}}"],
+          "path": ["api", "v1", "ratings"]
+        }
+      }
+    },
+    {
+      "name": "Messages - Send",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{accessToken}}"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"bookingId\": \"{{bookingId}}\",\n  \"content\": \"Bonjour, je serai devant la gare 10 minutes avant le départ.\"\n}"
+        },
+        "url": {
+          "raw": "{{baseUrl}}/api/v1/messages",
+          "host": ["{{baseUrl}}"],
+          "path": ["api", "v1", "messages"]
+        }
+      }
+    },
+    {
+      "name": "Admin - Stats",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{adminAccessToken}}"
+          }
+        ],
+        "url": {
+          "raw": "{{baseUrl}}/api/v1/admin/stats",
+          "host": ["{{baseUrl}}"],
+          "path": ["api", "v1", "admin", "stats"]
+        }
+      }
     }
   ],
   "variable": [
     {
       "key": "baseUrl",
       "value": "http://localhost:3000"
+    },
+    {
+      "key": "phone",
+      "value": "+33600000000"
+    },
+    {
+      "key": "otpCode",
+      "value": "000000"
+    },
+    {
+      "key": "accessToken",
+      "value": ""
+    },
+    {
+      "key": "adminAccessToken",
+      "value": ""
+    },
+    {
+      "key": "vehicleId",
+      "value": ""
+    },
+    {
+      "key": "tripId",
+      "value": ""
+    },
+    {
+      "key": "bookingId",
+      "value": ""
+    },
+    {
+      "key": "rateeId",
+      "value": ""
     }
   ]
 }

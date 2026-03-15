@@ -14,6 +14,7 @@ import Twilio from 'twilio';
 import {
   OTP_BLOCK_TTL_SECONDS,
   OTP_MAX_ATTEMPTS,
+  OTP_RESEND_COOLDOWN_SECONDS,
   OTP_TTL_SECONDS,
 } from './constants';
 import { RefreshTokenDto } from './dto/refresh-token.dto';
@@ -46,11 +47,17 @@ export class AuthService {
     const phone = this.normalizePhone(sendOtpDto.phone);
 
     await this.ensureNotBlocked(phone);
+    await this.ensureResendCooldown(phone);
 
     const otp = this.generateOtp();
     const otpHash = await bcrypt.hash(otp, 10);
 
     await this.redisService.set(this.otpKey(phone), otpHash, OTP_TTL_SECONDS);
+    await this.redisService.set(
+      this.otpResendKey(phone),
+      '1',
+      OTP_RESEND_COOLDOWN_SECONDS,
+    );
     await this.redisService.del(this.otpAttemptsKey(phone));
 
     await this.dispatchOtp(phone, otp);
@@ -188,6 +195,18 @@ export class AuthService {
     }
   }
 
+  private async ensureResendCooldown(phone: string): Promise<void> {
+    const recentlySent = await this.redisService.exists(
+      this.otpResendKey(phone),
+    );
+    if (recentlySent) {
+      throw new HttpException(
+        `OTP déjà envoyé, réessaie dans ${OTP_RESEND_COOLDOWN_SECONDS} secondes`,
+        HttpStatus.TOO_MANY_REQUESTS,
+      );
+    }
+  }
+
   private async registerFailedOtpAttempt(phone: string): Promise<void> {
     const attempts = await this.redisService.incr(this.otpAttemptsKey(phone));
 
@@ -253,6 +272,10 @@ export class AuthService {
 
   private otpBlockedKey(phone: string): string {
     return `otp:blocked:${phone}`;
+  }
+
+  private otpResendKey(phone: string): string {
+    return `otp:resend_cooldown:${phone}`;
   }
 
   private maskPhone(phone: string): string {

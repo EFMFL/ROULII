@@ -17,6 +17,7 @@ import { RatingsModule } from './ratings/ratings.module';
 import { RedisModule } from './redis/redis.module';
 import { TripsModule } from './trips/trips.module';
 import { UsersModule } from './users/users.module';
+import { UploadModule } from './upload/upload.module';
 import { VehiclesModule } from './vehicles/vehicles.module';
 import { WalletModule } from './wallet/wallet.module';
 
@@ -36,6 +37,7 @@ import { WalletModule } from './wallet/wallet.module';
     RedisModule,
     AuthModule,
     UsersModule,
+    UploadModule,
     VehiclesModule,
     TripsModule,
     BookingsModule,
