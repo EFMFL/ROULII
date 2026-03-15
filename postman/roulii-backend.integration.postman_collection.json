@@ -1,0 +1,421 @@
+{
+  "info": {
+    "name": "Roulii Backend Seeded Integration",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "Health",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.response.to.have.status(200);",
+              "const body = pm.response.json();",
+              "pm.expect(body.status).to.eql('ok');"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "url": "{{baseUrl}}/api/v1/health"
+      }
+    },
+    {
+      "name": "Driver Vehicles",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.response.to.have.status(200);",
+              "const body = pm.response.json();",
+              "pm.expect(body).to.be.an('array');",
+              "pm.expect(body.some((item) => item.id === pm.environment.get('vehicleId'))).to.eql(true);"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "header": [
+          { "key": "Authorization", "value": "Bearer {{driverAccessToken}}" }
+        ],
+        "url": "{{baseUrl}}/api/v1/vehicles/me"
+      }
+    },
+    {
+      "name": "Trip Search",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.response.to.have.status(200);",
+              "const body = pm.response.json();",
+              "pm.expect(body.items).to.be.an('array');",
+              "pm.expect(body.items.some((item) => item.id === pm.environment.get('activeTripId'))).to.eql(true);"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "url": "{{baseUrl}}/api/v1/trips?origin=48.8566&destination=45.7640"
+      }
+    },
+    {
+      "name": "Trip Detail",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.response.to.have.status(200);",
+              "const body = pm.response.json();",
+              "pm.expect(body.id).to.eql(pm.environment.get('activeTripId'));"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "url": "{{baseUrl}}/api/v1/trips/{{activeTripId}}"
+      }
+    },
+    {
+      "name": "Passenger Bookings",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.response.to.have.status(200);",
+              "const body = pm.response.json();",
+              "pm.expect(body).to.be.an('array');",
+              "pm.expect(body.some((item) => item.id === pm.environment.get('pendingBookingId'))).to.eql(true);"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "header": [
+          { "key": "Authorization", "value": "Bearer {{passengerAccessToken}}" }
+        ],
+        "url": "{{baseUrl}}/api/v1/bookings/my?tab=upcoming"
+      }
+    },
+    {
+      "name": "Booking Detail",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.response.to.have.status(200);",
+              "const body = pm.response.json();",
+              "pm.expect(body.id).to.eql(pm.environment.get('pendingBookingId'));",
+              "pm.expect(body.payment).to.be.an('object');"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "header": [
+          { "key": "Authorization", "value": "Bearer {{passengerAccessToken}}" }
+        ],
+        "url": "{{baseUrl}}/api/v1/bookings/{{pendingBookingId}}"
+      }
+    },
+    {
+      "name": "Payment Info",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.response.to.have.status(200);",
+              "const body = pm.response.json();",
+              "pm.expect(body.status).to.exist;"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "header": [
+          { "key": "Authorization", "value": "Bearer {{passengerAccessToken}}" }
+        ],
+        "url": "{{baseUrl}}/api/v1/payments/bookings/{{pendingBookingId}}"
+      }
+    },
+    {
+      "name": "Create Payment Intent",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.response.to.have.status(201);",
+              "const body = pm.response.json();",
+              "pm.expect(body.clientSecret).to.be.a('string');"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{passengerAccessToken}}"
+          },
+          { "key": "Content-Type", "value": "application/json" }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"bookingId\": \"{{pendingBookingId}}\"\n}"
+        },
+        "url": "{{baseUrl}}/api/v1/payments/intent"
+      }
+    },
+    {
+      "name": "Read Messages",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.response.to.have.status(200);",
+              "const body = pm.response.json();",
+              "pm.expect(body).to.be.an('array');",
+              "pm.expect(body.length).to.be.greaterThan(0);"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "header": [
+          { "key": "Authorization", "value": "Bearer {{passengerAccessToken}}" }
+        ],
+        "url": "{{baseUrl}}/api/v1/messages/bookings/{{pendingBookingId}}"
+      }
+    },
+    {
+      "name": "Send Message",
+      "event": [
+        {
+          "listen": "prerequest",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.environment.set('dynamicMessage', 'Message Newman ' + Date.now());"
+            ]
+          }
+        },
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.response.to.have.status(201);",
+              "const body = pm.response.json();",
+              "pm.expect(body.content).to.eql(pm.environment.get('dynamicMessage'));"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [
+          { "key": "Authorization", "value": "Bearer {{driverAccessToken}}" },
+          { "key": "Content-Type", "value": "application/json" }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"bookingId\": \"{{pendingBookingId}}\",\n  \"content\": \"{{dynamicMessage}}\"\n}"
+        },
+        "url": "{{baseUrl}}/api/v1/messages"
+      }
+    },
+    {
+      "name": "Driver Wallet Balance",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.response.to.have.status(200);",
+              "const body = pm.response.json();",
+              "pm.expect(body.balance).to.be.a('number');",
+              "pm.expect(body.balance).to.be.at.least(0);"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "header": [
+          { "key": "Authorization", "value": "Bearer {{driverAccessToken}}" }
+        ],
+        "url": "{{baseUrl}}/api/v1/wallet/balance"
+      }
+    },
+    {
+      "name": "Driver Wallet Transactions",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.response.to.have.status(200);",
+              "const body = pm.response.json();",
+              "pm.expect(body.items).to.be.an('array');",
+              "pm.expect(body.items.length).to.be.greaterThan(0);"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "header": [
+          { "key": "Authorization", "value": "Bearer {{driverAccessToken}}" }
+        ],
+        "url": "{{baseUrl}}/api/v1/wallet/transactions"
+      }
+    },
+    {
+      "name": "Driver Ratings",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.response.to.have.status(200);",
+              "const body = pm.response.json();",
+              "pm.expect(body).to.be.an('array');",
+              "pm.expect(body.length).to.be.greaterThan(0);"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "url": "{{baseUrl}}/api/v1/ratings/users/{{driverUserId}}"
+      }
+    },
+    {
+      "name": "Admin Stats",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.response.to.have.status(200);",
+              "const body = pm.response.json();",
+              "pm.expect(body.users).to.be.a('number');",
+              "pm.expect(body.trips).to.be.a('number');"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "header": [
+          { "key": "Authorization", "value": "Bearer {{adminAccessToken}}" }
+        ],
+        "url": "{{baseUrl}}/api/v1/admin/stats"
+      }
+    },
+    {
+      "name": "Admin Users",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.response.to.have.status(200);",
+              "const body = pm.response.json();",
+              "pm.expect(body.items).to.be.an('array');",
+              "pm.expect(body.items.length).to.be.greaterThan(0);"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "header": [
+          { "key": "Authorization", "value": "Bearer {{adminAccessToken}}" }
+        ],
+        "url": "{{baseUrl}}/api/v1/admin/users"
+      }
+    },
+    {
+      "name": "Admin Trips",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.response.to.have.status(200);",
+              "const body = pm.response.json();",
+              "pm.expect(body.items).to.be.an('array');",
+              "pm.expect(body.items.some((item) => item.id === pm.environment.get('activeTripId'))).to.eql(true);"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "header": [
+          { "key": "Authorization", "value": "Bearer {{adminAccessToken}}" }
+        ],
+        "url": "{{baseUrl}}/api/v1/admin/trips"
+      }
+    },
+    {
+      "name": "Upload Presigned URL Degradation",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": ["pm.expect([200, 503]).to.include(pm.response.code);"]
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [
+          { "key": "Authorization", "value": "Bearer {{driverAccessToken}}" },
+          { "key": "Content-Type", "value": "application/json" }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"filename\": \"avatar.jpg\",\n  \"contentType\": \"image/jpeg\"\n}"
+        },
+        "url": "{{baseUrl}}/api/v1/upload/presigned-url"
+      }
+    }
+  ]
+}

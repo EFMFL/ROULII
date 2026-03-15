@@ -6,4 +6,5 @@ node_modules
 dist
 coverage
 .DS_Store
+postman/roulii-seed.postman_environment.json
 
