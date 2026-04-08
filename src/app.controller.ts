@@ -11,4 +11,10 @@ export class AppController {
   health() {
     return this.appService.health();
   }
+
+  @Public()
+  @Get('health/readiness')
+  readiness() {
+    return this.appService.readiness();
+  }
 }

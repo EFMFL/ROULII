@@ -192,12 +192,62 @@
         ],
         "body": {
           "mode": "raw",
-          "raw": "{\n  \"tripId\": \"{{tripId}}\",\n  \"seats\": 1\n}"
+          "raw": "{\n  \"tripId\": \"{{tripId}}\",\n  \"seats\": 1,\n  \"paymentMethod\": \"CARD\"\n}"
         },
         "url": {
           "raw": "{{baseUrl}}/api/v1/bookings",
           "host": ["{{baseUrl}}"],
           "path": ["api", "v1", "bookings"]
+        }
+      }
+    },
+    {
+      "name": "Bookings - Driver Action (Accept Cash)",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{driverAccessToken}}"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"action\": \"accept\"\n}"
+        },
+        "url": {
+          "raw": "{{baseUrl}}/api/v1/bookings/{{bookingId}}/driver-action",
+          "host": ["{{baseUrl}}"],
+          "path": ["api", "v1", "bookings", "{{bookingId}}", "driver-action"]
+        }
+      }
+    },
+    {
+      "name": "Bookings - Complete",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{driverAccessToken}}"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"note\": \"Trajet termine\"\n}"
+        },
+        "url": {
+          "raw": "{{baseUrl}}/api/v1/bookings/{{bookingId}}/complete",
+          "host": ["{{baseUrl}}"],
+          "path": ["api", "v1", "bookings", "{{bookingId}}", "complete"]
         }
       }
     },
@@ -240,6 +290,112 @@
           "raw": "{{baseUrl}}/api/v1/wallet/balance",
           "host": ["{{baseUrl}}"],
           "path": ["api", "v1", "wallet", "balance"]
+        }
+      }
+    },
+    {
+      "name": "Wallet - Recharge",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{accessToken}}"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"amount\": 20,\n  \"reason\": \"Top-up local test\"\n}"
+        },
+        "url": {
+          "raw": "{{baseUrl}}/api/v1/wallet/recharge",
+          "host": ["{{baseUrl}}"],
+          "path": ["api", "v1", "wallet", "recharge"]
+        }
+      }
+    },
+    {
+      "name": "Wallet - Withdraw",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{accessToken}}"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"amount\": 10\n}"
+        },
+        "url": {
+          "raw": "{{baseUrl}}/api/v1/wallet/withdrawals",
+          "host": ["{{baseUrl}}"],
+          "path": ["api", "v1", "wallet", "withdrawals"]
+        }
+      }
+    },
+    {
+      "name": "Tracking - Update Position",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{driverAccessToken}}"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"latitude\": 48.8566,\n  \"longitude\": 2.3522\n}"
+        },
+        "url": {
+          "raw": "{{baseUrl}}/api/v1/tracking/bookings/{{bookingId}}/position",
+          "host": ["{{baseUrl}}"],
+          "path": [
+            "api",
+            "v1",
+            "tracking",
+            "bookings",
+            "{{bookingId}}",
+            "position"
+          ]
+        }
+      }
+    },
+    {
+      "name": "Tracking - Get Position",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{accessToken}}"
+          }
+        ],
+        "url": {
+          "raw": "{{baseUrl}}/api/v1/tracking/bookings/{{bookingId}}/position",
+          "host": ["{{baseUrl}}"],
+          "path": [
+            "api",
+            "v1",
+            "tracking",
+            "bookings",
+            "{{bookingId}}",
+            "position"
+          ]
         }
       }
     },
@@ -326,6 +482,10 @@
     },
     {
       "key": "accessToken",
+      "value": ""
+    },
+    {
+      "key": "driverAccessToken",
       "value": ""
     },
     {

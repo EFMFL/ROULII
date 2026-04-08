@@ -1,12 +1,26 @@
 import { INestApplication, Module } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
 import { Test, TestingModule } from '@nestjs/testing';
 import request from 'supertest';
 import { AppController } from '../src/app.controller';
 import { AppService } from '../src/app.service';
+import { PrismaService } from '../src/prisma/prisma.service';
+import { RedisService } from '../src/redis/redis.service';
 
 @Module({
   controllers: [AppController],
-  providers: [AppService],
+  providers: [
+    AppService,
+    { provide: PrismaService, useValue: { $queryRaw: jest.fn() } },
+    {
+      provide: RedisService,
+      useValue: { ping: jest.fn().mockResolvedValue(true) },
+    },
+    {
+      provide: ConfigService,
+      useValue: { get: jest.fn().mockReturnValue('') },
+    },
+  ],
 })
 class TestAppModule {}
 

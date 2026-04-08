@@ -192,6 +192,155 @@
       }
     },
     {
+      "name": "Cash Booking Driver Action",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.expect([200, 201, 400, 404]).to.include(pm.response.code);"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [
+          { "key": "Authorization", "value": "Bearer {{driverAccessToken}}" },
+          { "key": "Content-Type", "value": "application/json" }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"action\": \"accept\"\n}"
+        },
+        "url": "{{baseUrl}}/api/v1/bookings/{{pendingBookingId}}/driver-action"
+      }
+    },
+    {
+      "name": "Cash Booking Complete",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.expect([200, 201, 400, 404]).to.include(pm.response.code);"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [
+          { "key": "Authorization", "value": "Bearer {{driverAccessToken}}" },
+          { "key": "Content-Type", "value": "application/json" }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"note\": \"Trajet termine (test integration)\"\n}"
+        },
+        "url": "{{baseUrl}}/api/v1/bookings/{{pendingBookingId}}/complete"
+      }
+    },
+    {
+      "name": "Driver Wallet Recharge",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.expect([200, 201]).to.include(pm.response.code);",
+              "const body = pm.response.json();",
+              "pm.expect(body.success).to.eql(true);"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [
+          { "key": "Authorization", "value": "Bearer {{driverAccessToken}}" },
+          { "key": "Content-Type", "value": "application/json" }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"amount\": 20,\n  \"reason\": \"Top-up integration test\"\n}"
+        },
+        "url": "{{baseUrl}}/api/v1/wallet/recharge"
+      }
+    },
+    {
+      "name": "Driver Wallet Withdrawal",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": ["pm.expect([200, 201, 400]).to.include(pm.response.code);"]
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [
+          { "key": "Authorization", "value": "Bearer {{driverAccessToken}}" },
+          { "key": "Content-Type", "value": "application/json" }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"amount\": 10\n}"
+        },
+        "url": "{{baseUrl}}/api/v1/wallet/withdrawals"
+      }
+    },
+    {
+      "name": "Tracking Update Driver Position",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.expect([200, 201, 403, 404]).to.include(pm.response.code);"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [
+          { "key": "Authorization", "value": "Bearer {{driverAccessToken}}" },
+          { "key": "Content-Type", "value": "application/json" }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"latitude\": 48.8566,\n  \"longitude\": 2.3522\n}"
+        },
+        "url": "{{baseUrl}}/api/v1/tracking/bookings/{{pendingBookingId}}/position"
+      }
+    },
+    {
+      "name": "Tracking Get Booking Position",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": ["pm.expect([200, 403, 404]).to.include(pm.response.code);"]
+          }
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "header": [
+          { "key": "Authorization", "value": "Bearer {{passengerAccessToken}}" }
+        ],
+        "url": "{{baseUrl}}/api/v1/tracking/bookings/{{pendingBookingId}}/position"
+      }
+    },
+    {
       "name": "Read Messages",
       "event": [
         {

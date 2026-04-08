@@ -1,5 +1,6 @@
 import { Body, Controller, Post, Req } from '@nestjs/common';
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
+import { Throttle } from '@nestjs/throttler';
 import { Request } from 'express';
 import { Public } from '../common/decorators/public.decorator';
 import { AuthService } from './auth.service';
@@ -18,18 +19,21 @@ export class AuthController {
 
   @Public()
   @Post('send-otp')
+  @Throttle({ default: { limit: 5, ttl: 60_000 } })
   sendOtp(@Body() sendOtpDto: SendOtpDto) {
     return this.authService.sendOtp(sendOtpDto);
   }
 
   @Public()
   @Post('verify-otp')
+  @Throttle({ default: { limit: 8, ttl: 60_000 } })
   verifyOtp(@Body() verifyOtpDto: VerifyOtpDto) {
     return this.authService.verifyOtp(verifyOtpDto);
   }
 
   @Public()
   @Post('refresh')
+  @Throttle({ default: { limit: 20, ttl: 60_000 } })
   refresh(@Body() refreshTokenDto: RefreshTokenDto) {
     return this.authService.refresh(refreshTokenDto);
   }

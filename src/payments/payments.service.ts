@@ -4,10 +4,12 @@ import {
   Injectable,
   Logger,
   NotFoundException,
+  ServiceUnavailableException,
 } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import {
   BookingStatus,
+  PaymentMethod,
   PaymentStatus,
   WalletTransactionType,
 } from '@prisma/client';
@@ -21,6 +23,7 @@ import {
 @Injectable()
 export class PaymentsService {
   private readonly logger = new Logger(PaymentsService.name);
+  private readonly isProduction: boolean;
   private readonly stripe?: Stripe;
   private readonly webhookSecret?: string;
 
@@ -29,6 +32,7 @@ export class PaymentsService {
     private readonly notificationsService: NotificationsService,
     private readonly configService: ConfigService,
   ) {
+    this.isProduction = configService.get<string>('NODE_ENV') === 'production';
     const secretKey = configService.get<string>('STRIPE_SECRET_KEY');
     this.webhookSecret = configService.get<string>('STRIPE_WEBHOOK_SECRET');
 
@@ -55,6 +59,12 @@ export class PaymentsService {
       throw new ForbiddenException('Accès refusé');
     }
 
+    if (booking.paymentMethod !== PaymentMethod.CARD) {
+      throw new BadRequestException(
+        'Les PaymentIntent Stripe sont disponibles uniquement pour les réservations par carte',
+      );
+    }
+
     if (booking.status !== BookingStatus.PENDING_PAYMENT) {
       throw new BadRequestException(
         "Cette réservation n'est plus en attente de paiement",
@@ -66,6 +76,10 @@ export class PaymentsService {
     }
 
     if (!this.stripe) {
+      if (this.isProduction) {
+        throw new ServiceUnavailableException('Stripe non configuré');
+      }
+
       const simulatedClientSecret = `pi_sim_${booking.id}_secret_mock`;
       return {
         clientSecret: simulatedClientSecret,
@@ -114,6 +128,12 @@ export class PaymentsService {
 
   async handleWebhook(rawBody: Buffer, signature: string): Promise<void> {
     if (!this.stripe || !this.webhookSecret) {
+      if (this.isProduction) {
+        throw new ServiceUnavailableException(
+          'Webhook Stripe indisponible: configuration manquante',
+        );
+      }
+
       this.logger.warn('Webhook Stripe reçu mais Stripe non configuré');
       return;
     }

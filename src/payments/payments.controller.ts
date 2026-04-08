@@ -8,6 +8,7 @@ import {
   Req,
 } from '@nestjs/common';
 import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
+import { Throttle } from '@nestjs/throttler';
 import { Request } from 'express';
 import { JwtPayload } from '../auth/interfaces/jwt-payload.interface';
 import { Public } from '../common/decorators/public.decorator';
@@ -24,6 +25,7 @@ export class PaymentsController {
 
   @ApiBearerAuth()
   @Post('intent')
+  @Throttle({ default: { limit: 10, ttl: 60_000 } })
   @ApiOperation({
     summary: 'Créer un PaymentIntent Stripe pour une réservation',
   })
@@ -39,6 +41,7 @@ export class PaymentsController {
 
   @Public()
   @Post('webhook')
+  @Throttle({ default: { limit: 120, ttl: 60_000 } })
   @ApiOperation({ summary: 'Webhook Stripe (usage interne)' })
   handleWebhook(
     @Req() request: WebhookRequest,

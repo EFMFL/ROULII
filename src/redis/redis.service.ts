@@ -55,4 +55,13 @@ export class RedisService implements OnModuleDestroy {
     const value = await this.client.exists(key);
     return value === 1;
   }
+
+  async ping(): Promise<boolean> {
+    try {
+      const response = await this.client.ping();
+      return response === 'PONG';
+    } catch {
+      return false;
+    }
+  }
 }

@@ -15,6 +15,7 @@ import { PaymentsModule } from './payments/payments.module';
 import { PrismaModule } from './prisma/prisma.module';
 import { RatingsModule } from './ratings/ratings.module';
 import { RedisModule } from './redis/redis.module';
+import { TrackingModule } from './tracking/tracking.module';
 import { TripsModule } from './trips/trips.module';
 import { UsersModule } from './users/users.module';
 import { UploadModule } from './upload/upload.module';
@@ -46,6 +47,7 @@ import { WalletModule } from './wallet/wallet.module';
     RatingsModule,
     MessagesModule,
     NotificationsModule,
+    TrackingModule,
     AdminModule,
   ],
   controllers: [AppController],

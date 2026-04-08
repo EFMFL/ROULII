@@ -3,9 +3,19 @@
 ## Scope backend livre
 
 - Base NestJS modulaire: auth, users, vehicles, trips, bookings, payments, wallet, ratings, messages, notifications, admin.
+- Base NestJS modulaire: auth, users, vehicles, trips, bookings, payments, wallet, ratings, messages, notifications, admin, tracking GPS.
 - Configuration environnement validee via Joi.
 - Prisma schema complet avec migrations SQL initiales.
 - OTP par telephone (Twilio), JWT access/refresh, refresh/logout, guard JWT global.
+- OTP par telephone (Twilio), JWT access/refresh, refresh/logout, guard JWT global.
+- Parcours cash: booking card/cash, acceptation chauffeur, verification wallet, blocage commission, capture en fin de trajet.
+- Wallet: solde, montant bloque, solde retirable, recharge, retrait bancaire (seuil 10 EUR).
+- Amendes: annulation tardive (<10 min), penalite 20%, repartition 70% plateforme / 30% wallet chauffeur.
+- Notifications: push Firebase + SMS Twilio + email SMTP (mode mock si non configure).
+- Monitoring: endpoint readiness (/api/v1/health/readiness) avec statut DB/Redis/providers.
+- Observabilite: logs HTTP structures JSON + request id + filtre global d erreurs.
+- Hardening: rate limits par endpoint sensible (auth, paiements, bookings, wallet, tracking).
+- Production safety: providers externes (Stripe/Firebase/Twilio/SMTP) en fail-fast si non configures.
 - Endpoints users: me/public profile/update/anonymisation RGPD, token FCM.
 - Docker compose local: PostgreSQL + Redis.
 - Swagger: /docs.
@@ -54,3 +64,16 @@ Execution:
    npx newman run postman/roulii-backend.postman_collection.json --env-var baseUrl=http://localhost:3000
 
 Le test valide GET /api/v1/health et la structure de reponse attendue.
+
+## Nouveaux endpoints metier
+
+- Bookings:
+  - POST /api/v1/bookings (champ paymentMethod: CARD|CASH)
+  - POST /api/v1/bookings/:id/driver-action
+  - POST /api/v1/bookings/:id/complete
+- Wallet:
+  - POST /api/v1/wallet/recharge
+  - POST /api/v1/wallet/withdrawals
+- Tracking:
+  - POST /api/v1/tracking/bookings/:bookingId/position
+  - GET /api/v1/tracking/bookings/:bookingId/position

@@ -1,6 +1,7 @@
 import { ApiProperty } from '@nestjs/swagger';
+import { PaymentMethod } from '@prisma/client';
 import { Type } from 'class-transformer';
-import { IsInt, IsUUID, Max, Min } from 'class-validator';
+import { IsEnum, IsInt, IsUUID, Max, Min } from 'class-validator';
 
 export class CreateBookingDto {
   @ApiProperty({ example: 'f2b316df-99d7-4a87-8419-8109ef404d0a' })
@@ -13,4 +14,8 @@ export class CreateBookingDto {
   @Min(1)
   @Max(8)
   seats: number = 1;
+
+  @ApiProperty({ enum: PaymentMethod, default: PaymentMethod.CARD })
+  @IsEnum(PaymentMethod)
+  paymentMethod: PaymentMethod = PaymentMethod.CARD;
 }

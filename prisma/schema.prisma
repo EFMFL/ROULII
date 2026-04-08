@@ -34,6 +34,11 @@ enum PaymentStatus {
   REFUNDED
 }
 
+enum PaymentMethod {
+  CARD
+  CASH
+}
+
 enum CancelledBy {
   DRIVER
   PASSENGER
@@ -46,7 +51,13 @@ enum WalletTransactionType {
   WITHDRAWAL
   PENALTY_RECEIVED
   PENALTY_PAID
+  COMMISSION_CAPTURE
   ADJUSTMENT
+}
+
+enum PlatformLedgerType {
+  PENALTY_SHARE
+  COMMISSION_SHARE
 }
 
 model User {
@@ -105,7 +116,12 @@ model Booking {
   id           String       @id @default(uuid())
   tripId        String      @map("trip_id")
   passengerId   String      @map("passenger_id")
+  paymentMethod PaymentMethod @default(CARD) @map("payment_method")
   status        BookingStatus @default(PENDING_PAYMENT)
+  cashCommissionHeld Boolean @default(false) @map("cash_commission_held")
+  cashCommissionHeldAmount Decimal @default(0) @map("cash_commission_held_amount") @db.Decimal(10, 2)
+  cashAcceptedAt DateTime? @map("cash_accepted_at")
+  completedAt    DateTime? @map("completed_at")
   bookedAt      DateTime    @default(now()) @map("booked_at")
   updatedAt     DateTime    @updatedAt @map("updated_at")
 
@@ -114,6 +130,7 @@ model Booking {
   payment       Payment?
   cancellation  Cancellation?
   messages      Message[]
+  platformLedgerTransactions PlatformLedgerTransaction[]
 
   @@unique([tripId, passengerId])
   @@index([tripId])
@@ -164,6 +181,22 @@ model WalletTransaction {
 
   @@index([userId, createdAt])
   @@map("wallet_transactions")
+}
+
+model PlatformLedgerTransaction {
+  id          String           @id @default(uuid())
+  type        PlatformLedgerType
+  amount      Decimal          @db.Decimal(10, 2)
+  currency    String           @default("EUR")
+  bookingId   String?          @map("booking_id")
+  description String
+  createdAt   DateTime         @default(now()) @map("created_at")
+
+  booking     Booking?         @relation(fields: [bookingId], references: [id], onDelete: SetNull)
+
+  @@index([type, createdAt])
+  @@index([bookingId])
+  @@map("platform_ledger_transactions")
 }
 
 model Rating {
